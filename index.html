@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+(function(){
+  var HASH='7210e285cad94caffdc4e8a5e64842c5b75b98d1cfa7916e512748cc43b8ef8c';
+  function sha256(str){
+    return crypto.subtle.digest('SHA-256',new TextEncoder().encode(str))
+      .then(b=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join(''));
+  }
+  if(sessionStorage.getItem('rayno_auth')===HASH){return;}
+  document.addEventListener('DOMContentLoaded',function(){
+    document.body.style.display='none';
+    var ov=document.createElement('div');
+    ov.innerHTML='<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0d1117;display:flex;align-items:center;justify-content:center;z-index:99999"><div style="background:#1a1f2e;border-radius:16px;padding:48px 40px;width:360px;text-align:center"><div style="font-size:26px;font-weight:800;color:#fff;margin-bottom:4px">Rayno Window Film</div><div style="color:#6b7280;font-size:14px;margin-bottom:28px">Sales Dashboard</div><input id="pwi" type="password" placeholder="Password" autocomplete="off" style="width:100%;padding:13px 16px;border-radius:10px;border:1.5px solid #374151;background:#111827;color:#fff;font-size:15px;outline:none;margin-bottom:10px;text-align:center;letter-spacing:2px" onkeydown="if(event.key==='Enter')document.getElementById('pwb').click()"><div id="pwe" style="color:#ef4444;font-size:13px;height:18px;margin-bottom:8px"></div><button id="pwb" style="width:100%;padding:13px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer" onclick="(function(){sha256(document.getElementById('pwi').value).then(function(h){if(h==='7210e285cad94caffdc4e8a5e64842c5b75b98d1cfa7916e512748cc43b8ef8c'){sessionStorage.setItem('rayno_auth',h);ov.remove();document.body.style.display='';}else{document.getElementById('pwe').textContent='❌ Incorrect password';document.getElementById('pwi').value='';document.getElementById('pwi').focus();}})})()">Sign In</button></div></div>';
+    document.body.appendChild(ov);
+    setTimeout(function(){document.getElementById('pwi').focus();},100);
+  });
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rayno Window Film USA — Sales Dashboard</title>
