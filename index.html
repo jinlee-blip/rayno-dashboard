@@ -139,11 +139,11 @@
   <div class="logo">RAYNO WINDOW FILM <span>USA</span> &mdash; Sales Dashboard</div>
   <div class="header-right">
     <div class="date-nav">
-      <button class="nav-btn" title="Previous Day">◀</button>
-      <div class="date-label">June 15, 2026 (Mon)</div>
-      <button class="nav-btn" title="Next Day">▶</button>
+      <button class="nav-btn" id="btn-prev" title="Previous Day">◀</button>
+      <div class="date-label" id="date-label">June 16, 2026 (Tue)</div>
+      <button class="nav-btn" id="btn-next" title="Next Day">▶</button>
     </div>
-    <button onclick="openUpdateModal()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:7px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:600;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">🔄 Update Data</button>
+    <button id="btn-update" onclick="triggerUpdate()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:7px 16px;border-radius:20px;cursor:pointer;font-size:13px;font-weight:600;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">🔄 Update Data</button>
     <div class="timestamp">Source: Finale Inventory</div>
   </div>
 </header>
@@ -2025,16 +2025,71 @@ document.getElementById('update-modal').addEventListener('click', function(e){
 });
 
 /* ================================================================
-   DATE — auto-update to today
+   DATE NAVIGATION + UPDATE DATA
    ================================================================ */
 (function(){
-  const now = new Date();
-  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const label = months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear() + ' (' + days[now.getDay()] + ')';
-  const el = document.querySelector('.date-label');
-  if(el) el.textContent = label;
+  var DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var today  = new Date(); today.setHours(0,0,0,0);
+  var currentDate = new Date(today);
+
+  function toYMD(d){ return d.getFullYear()+'-'+(d.getMonth()+1<10?'0':'')+(d.getMonth()+1)+'-'+(d.getDate()<10?'0':'')+d.getDate(); }
+  var TODAY_STR = toYMD(today);
+
+  function formatLabel(d){
+    return MONTHS[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear()+' ('+DAYS[d.getDay()]+')';
+  }
+
+  function updateView(){
+    var lbl = document.getElementById('date-label');
+    if(lbl) lbl.textContent = formatLabel(currentDate);
+    var isToday = (toYMD(currentDate) === TODAY_STR);
+    var dailyTab = document.getElementById('tab-daily');
+    if(dailyTab){
+      var banner = document.getElementById('no-data-banner');
+      if(!isToday){
+        if(!banner){
+          banner = document.createElement('div');
+          banner.id = 'no-data-banner';
+          banner.style.cssText = 'background:#1e293b;border:1px solid #334155;border-radius:10px;padding:24px;text-align:center;color:#94a3b8;font-size:15px;margin:16px 0;';
+          banner.innerHTML = '<div style="font-size:22px;margin-bottom:8px">📅</div><div>해당 날짜의 데이터가 없습니다</div><div style="font-size:13px;margin-top:6px;color:#64748b">데이터는 매일 자동 업데이트됩니다</div>';
+          dailyTab.insertBefore(banner, dailyTab.firstChild);
+        }
+        banner.style.display='block';
+        Array.from(dailyTab.children).forEach(function(c){ if(c.id!=='no-data-banner') c.style.opacity='0.15'; });
+      } else {
+        if(banner) banner.style.display='none';
+        Array.from(dailyTab.children).forEach(function(c){ if(c.id!=='no-data-banner') c.style.opacity=''; });
+      }
+    }
+    var btnNext = document.getElementById('btn-next');
+    if(btnNext) btnNext.style.opacity = isToday ? '0.3' : '1';
+  }
+
+  setTimeout(updateView, 100);
+
+  var bp = document.getElementById('btn-prev');
+  if(bp) bp.addEventListener('click', function(){
+    currentDate.setDate(currentDate.getDate()-1);
+    updateView();
+    var db = document.querySelector('[data-period="daily"]');
+    if(db) db.click();
+  });
+
+  var bn = document.getElementById('btn-next');
+  if(bn) bn.addEventListener('click', function(){
+    var next = new Date(currentDate); next.setDate(next.getDate()+1);
+    if(next <= today){ currentDate=next; updateView(); }
+  });
 })();
+
+window.triggerUpdate = function(){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:24px;right:24px;background:#1e293b;border:1px solid #3b82f6;color:#93c5fd;padding:16px 22px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;line-height:1.6;';
+  t.innerHTML='🔄 <strong>자동 업데이트 중...</strong><br><span style="font-size:12px;color:#64748b">매일 오전 8시 / 오후 12시 / 오후 5시 자동 갱신</span>';
+  document.body.appendChild(t);
+  setTimeout(function(){t.remove();},5000);
+};
 
 /* ================================================================
    INIT
