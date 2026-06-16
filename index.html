@@ -149,31 +149,7 @@
 </header>
 
 <!-- UPDATE DATA MODAL -->
-<div id="update-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:16px;padding:32px;max-width:620px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
-    <h2 style="margin:0 0 8px;font-size:20px;color:#1a1a2e;">🔄 Update Customer Data</h2>
-    <p style="margin:0 0 20px;color:#64748b;font-size:14px;">Finale에서 최신 데이터를 가져오는 방법:</p>
-    <ol style="margin:0 0 16px;padding-left:20px;color:#1a1a2e;font-size:14px;line-height:2;">
-      <li>Chrome에서 Finale 탭을 열어주세요</li>
-      <li><b>F12</b> 눌러서 DevTools 열기 → <b>Console</b> 탭 클릭</li>
-      <li>아래 명령어를 복사해서 콘솔에 붙여넣고 Enter:</li>
-    </ol>
-    <div style="background:#1a1a2e;border-radius:8px;padding:12px 16px;margin-bottom:16px;position:relative;">
-      <code id="console-cmd" style="color:#a8ff78;font-size:12px;font-family:monospace;word-break:break-all;">copy(JSON.stringify({monthly:JSON.parse(localStorage.fin_monthly||'[]'),quarterly:JSON.parse(localStorage.fin_quarterly||'[]'),ytd:JSON.parse(localStorage.fin_ytd||'[]')}))</code>
-      <button onclick="copyCmd()" style="position:absolute;right:8px;top:8px;background:rgba(255,255,255,0.15);border:none;color:#fff;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;" id="copy-cmd-btn">Copy</button>
-    </div>
-    <ol start="4" style="margin:0 0 16px;padding-left:20px;color:#1a1a2e;font-size:14px;line-height:2;">
-      <li>콘솔이 <b>"undefined"</b>를 표시하면 클립보드에 복사된 것입니다</li>
-      <li>아래 텍스트박스를 클릭하고 <b>Ctrl+V</b> 로 붙여넣기:</li>
-    </ol>
-    <textarea id="update-paste-area" placeholder="여기에 붙여넣기 (Ctrl+V)..." style="width:100%;height:100px;border:2px solid #e2e8f0;border-radius:8px;padding:12px;font-size:13px;font-family:monospace;resize:none;outline:none;" onfocus="this.style.border='2px solid #e94560'" onblur="this.style.border='2px solid #e2e8f0'"></textarea>
-    <div id="update-status" style="margin:8px 0;font-size:13px;min-height:20px;"></div>
-    <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:16px;">
-      <button onclick="closeUpdateModal()" style="background:#f1f5f9;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;color:#64748b;">취소</button>
-      <button onclick="applyUpdateData()" style="background:#e94560;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;color:#fff;">적용하기</button>
-    </div>
-  </div>
-</div>
+
 
 <div class="tabs-bar">
   <button class="tab-btn active" onclick="showTab('daily',this)">Daily (Today)</button>
@@ -1980,49 +1956,7 @@ function showTab(id, btn){
 /* ================================================================
    UPDATE DATA MODAL
    ================================================================ */
-function openUpdateModal(){
-  document.getElementById('update-modal').style.display='flex';
-  document.getElementById('update-paste-area').value='';
-  document.getElementById('update-status').textContent='';
-}
-function closeUpdateModal(){
-  document.getElementById('update-modal').style.display='none';
-}
-function copyCmd(){
-  const cmd = document.getElementById('console-cmd').textContent;
-  navigator.clipboard.writeText(cmd).then(()=>{
-    const btn = document.getElementById('copy-cmd-btn');
-    btn.textContent='✓ Copied!';
-    setTimeout(()=>{ btn.textContent='Copy'; }, 2000);
-  });
-}
-function applyUpdateData(){
-  const raw = document.getElementById('update-paste-area').value.trim();
-  const status = document.getElementById('update-status');
-  if(!raw){ status.style.color='#ef4444'; status.textContent='⚠️ 데이터를 붙여넣어 주세요.'; return; }
-  try {
-    const d = JSON.parse(raw);
-    if(!d.monthly && !d.quarterly && !d.ytd){ throw new Error('invalid'); }
-    const monthly = d.monthly || [];
-    const quarterly = d.quarterly || [];
-    const yearly = d.ytd || d.yearly || [];
-    localStorage.setItem('dash_customers', JSON.stringify({monthly, quarterly, yearly}));
-    CUSTOMERS_MAP.monthly = monthly;
-    CUSTOMERS_MAP.quarterly = quarterly;
-    CUSTOMERS_MAP.yearly = yearly;
-    Object.keys(_normCache).forEach(k=>{ delete _normCache[k]; });
-    ['monthly','quarterly','yearly'].forEach(p=>{ buildCards(p); buildTable(p); buildCustomerList(p); });
-    status.style.color='#10b981';
-    status.textContent = `✅ 업데이트 완료! Monthly: ${monthly.length}명, Quarterly: ${quarterly.length}명, Yearly: ${yearly.length}명`;
-    setTimeout(closeUpdateModal, 2500);
-  } catch(e){
-    status.style.color='#ef4444';
-    status.textContent='❌ 데이터 형식 오류. Finale 콘솔 명령어를 다시 실행해 주세요.';
-  }
-}
-document.getElementById('update-modal').addEventListener('click', function(e){
-  if(e.target === this) closeUpdateModal();
-});
+
 
 /* ================================================================
    DATE NAVIGATION + UPDATE DATA
