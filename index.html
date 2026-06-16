@@ -2027,6 +2027,7 @@ document.getElementById('update-modal').addEventListener('click', function(e){
 /* ================================================================
    DATE NAVIGATION + UPDATE DATA
    ================================================================ */
+document.addEventListener('DOMContentLoaded', function(){
 (function(){
   var DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2072,8 +2073,7 @@ document.getElementById('update-modal').addEventListener('click', function(e){
   if(bp) bp.addEventListener('click', function(){
     currentDate.setDate(currentDate.getDate()-1);
     updateView();
-    var db = document.querySelector('[data-period="daily"]');
-    if(db) db.click();
+    showTab('daily', document.querySelectorAll('.tab-btn')[0]);
   });
 
   var bn = document.getElementById('btn-next');
@@ -2082,6 +2082,7 @@ document.getElementById('update-modal').addEventListener('click', function(e){
     if(next <= today){ currentDate=next; updateView(); }
   });
 })();
+});
 
 window.triggerUpdate = function(){
   var t=document.createElement('div');
