@@ -19,8 +19,11 @@ jobs:
           python-version: '3.11'
       - run: pip install requests python-dotenv
       - run: |
-          if [ -f index.html ]; then cp index.html dashboard_report.html; fi
-      - run: python update_dashboard.py
+          if [ -f index.html ]; then
+            cp index.html dashboard_report.html
+          fi
+      - name: Run update script
+        run: python update_dashboard.py
         env:
           FINALE_USER: ${{ secrets.FINALE_USER }}
           FINALE_PASS: ${{ secrets.FINALE_PASS }}
@@ -28,6 +31,6 @@ jobs:
       - run: |
           git config user.name "Rayno Bot"
           git config user.email "bot@raynofilm.com"
-          git add index.html dashboard_report.html
-          git diff --cached --quiet || git commit -m "Auto-update $(TZ='America/Los_Angeles' date +'%Y-%m-%d %H:%M PST')"
+          git add index.html
+          git diff --quiet --cached || git commit -m "Auto-update dashboard"
           git push
