@@ -299,8 +299,35 @@ def main():
     yr_start  = year_start_str()
 
     daily_orders   = fetch_orders(u, p, today,    today,    'Today')
-    weekly_orders  = fetch_orders(u, p, wk_start, today,    'This Week')
     monthly_orders = fetch_orders(u, p, mo_start, today,    'This Month')
+
+    # 최근 7일 히스토리
+    history_by_date = {today: daily_orders}
+    for days_ago in range(1, 7):
+        d = (date.today() - timedelta(days=days_ago)).strftime('%Y-%m-%d')
+        h_orders = fetch_orders(u, p, d, d, f'{days_ago}일 전 ({d})')
+        if h_orders:
+            history_by_date[d] = h_orders
+
+    # 이번 주 데이터: 월요일~오늘 개별 fetch 집계
+    wk_start_date = date.today() - timedelta(days=date.today().weekday())
+    weekly_orders = []
+    seen_ids = set()
+    d = wk_start_date
+    while d <= date.today():
+        d_str = d.strftime('%Y-%m-%d')
+        day_orders = history_by_date.get(d_str) or fetch_orders(u, p, d_str, d_str, d_str)
+        if day_orders and d_str not in history_by_date:
+            history_by_date[d_str] = day_orders
+        for o in day_orders:
+            oid = str(o.get('sale_id') or o.get('id') or '')
+            if oid and oid not in seen_ids:
+                seen_ids.add(oid)
+                weekly_orders.append(o)
+            elif not oid:
+                weekly_orders.append(o)
+        d += timedelta(days=1)
+    print(f'  이번 주 집계: {len(weekly_orders)} orders')
 
     if full_update:
         quarterly_orders = fetch_orders(u, p, qt_start, today, 'This Quarter')
